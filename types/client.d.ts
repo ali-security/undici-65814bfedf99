@@ -91,7 +91,9 @@ export declare namespace Client {
      * @description Dictates the maximum number of concurrent streams for a single H2 session. It can be overridden by a SETTINGS remote frame.
      * @default 100
     */
-    maxConcurrentStreams?: number
+    maxConcurrentStreams?: number;
+    /** WebSocket-specific configuration options. */
+    webSocket?: WebSocketOptions;
   }
   export interface SocketInfo {
     localAddress?: string
@@ -102,6 +104,13 @@ export declare namespace Client {
     timeout?: number
     bytesWritten?: number
     bytesRead?: number
+  }
+  export interface WebSocketOptions {
+    /**
+     * Maximum number of fragments in a message. Set to 0 to disable the limit.
+     * @default 131072
+     */
+    maxFragments?: number;
   }
 }
 
