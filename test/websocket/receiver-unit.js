@@ -11,31 +11,32 @@ const invalidFrame = Buffer.from([0x82, 0x7F, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00
 test('ByteParser rejects 64-bit payload lengths with a non-zero upper word', (t) => {
   const calls = {
     abort: 0,
-    close: 0
+    destroy: 0
   }
 
-  const handler = {
-    [kReadyState]: states.CONNECTING,
-    [kController]: {
-      abort: () => {
-        calls.abort += 1
+  const ws = new EventTarget()
+  ws[kController] = {
+    abort: () => {
+      calls.abort += 1
+    }
+  }
+  ws[kResponse] = {
+    socket: {
+      destroyed: false,
+      destroy: () => {
+        calls.destroy += 1
       }
-    },
-    [kResponse]: null,
-    dispatchEvent: () => {},
-    onSocketClose: () => {
-      calls.close += 1
-    },
-    closeState: new Set()
+    }
   }
 
-  const parser = new ByteParser(handler)
+  const parser = new ByteParser(ws)
 
   parser.write(invalidFrame)
 
   return new Promise((resolve) => {
     setImmediate(() => {
       assert.strictEqual(calls.abort, 1)
+      assert.strictEqual(calls.destroy, 1)
       parser.destroy()
       resolve()
     })
