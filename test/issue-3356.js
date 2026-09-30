@@ -7,7 +7,12 @@ const { once } = require('node:events')
 const { tick: fastTimersTick } = require('../lib/util/timers')
 const { fetch, Agent, RetryAgent } = require('..')
 
-test('https://github.com/nodejs/undici/issues/3356', async (t) => {
+// Timing-dependent (50ms bodyTimeout vs 100ms server delay): on macOS runners
+// the body completes before the timeout fires, the plan of 3 is never met and
+// the test hangs until the 30s borp timeout.
+const skip = process.platform === 'darwin'
+
+test('https://github.com/nodejs/undici/issues/3356', { skip }, async (t) => {
   t = tspl(t, { plan: 3 })
 
   let shouldRetry = true
